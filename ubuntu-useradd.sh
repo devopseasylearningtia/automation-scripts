@@ -1,0 +1,62 @@
+
+#!/bin/bash
+
+username=$(cat /tmp/users.txt | tr '[A-Z]' '[a-z]')
+
+function user_add() {
+    for users in $username
+    do
+        ls /home |grep $users &>/dev/nul || mkdir -p /home/$users 
+        cat /etc/passwd |awk -F: '{print$1}' |grep -w $users &>/dev/nul ||  useradd $users
+        chown -R $users:$users /home/$users
+        usermod -s /bin/bash -aG docker $users
+        echo -e "$users\n$users" |passwd "$users"
+        # passwd --expire $users
+    done
+}
+
+
+password_expire() {
+    for users in $username
+    do
+        passwd --expire $users
+    done
+}
+
+user_del() {
+    for users in $username
+    do
+        userdel -r -f $users
+    done
+}
+
+docker_run() {
+    docker rm -f $USER || true
+    docker run -d --name $USER --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro -v /var/run/docker.sock:/var/run/docker.sock -v "${HOME}":/student_home -w "/student_home" ${IMAGE_TAG}
+    docker exec -it $USER bash
+}
+
+options() {
+  case $@ in
+    -a|--useradd|-add)
+      user_add
+     ;;
+     -e|--expire|-ex)
+      password_expire
+      ;;
+     -d|--userdel|--del)
+      user_del
+      ;;
+      -r|--run|--run)
+      docker_run
+      ;;
+    *)
+      echo "Unknown option"
+      exit 1
+  esac
+}
+
+options $@
+
+
+
