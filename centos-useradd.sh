@@ -30,6 +30,20 @@ user_del() {
     done
 }
 
+user_lock() {
+    for users in $username
+    do
+        usermod -s /sbin/nologin $users
+    done
+}
+
+user_unlock() {
+    for users in $username
+    do
+        usermod -s /bin/bash $users
+    done
+}
+
 docker_run() {
     docker rm -f $USER || true
     docker run -d --name $USER --privileged -v /sys/fs/cgroup:/sys/fs/cgroup:ro -v /var/run/docker.sock:/var/run/docker.sock -v "${HOME}":/student_home -w "/student_home" ${IMAGE_TAG}
@@ -46,6 +60,12 @@ options() {
       ;;
      -d|--userdel|--del)
       user_del
+      ;;
+      -l | --lock
+      user_lock
+      ;;
+      -u | --unlock
+      user_unlock
       ;;
       -r|--run|--run)
       docker_run
