@@ -61,10 +61,10 @@ options() {
      -d|--userdel|--del)
       user_del
       ;;
-      -l | --lock)
+      -l|--lock)
       user_lock
       ;;
-      -u | --unlock)
+      -u|--unlock)
       user_unlock
       ;;
       -r|--run|--run)
