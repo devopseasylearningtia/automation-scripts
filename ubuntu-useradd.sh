@@ -34,6 +34,7 @@ user_lock() {
     for users in $username
     do
         usermod -s /sbin/nologin $users
+        cat /etc/passwd |grep $users
     done
 }
 
@@ -41,6 +42,7 @@ user_unlock() {
     for users in $username
     do
         usermod -s /bin/bash $users
+        cat /etc/passwd |grep $users
     done
 }
 
